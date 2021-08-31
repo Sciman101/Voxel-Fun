@@ -61,7 +61,6 @@ public class Player : MonoBehaviour
                         (int)hitPos.y,
                         (int)hitPos.z
                         ) - offset;
-                    print(blockPos);
                     
                     chunk.SetBlock(blockPos,(byte)(breaking ? 0 : 1));
                     if (breaking)
@@ -71,7 +70,7 @@ public class Player : MonoBehaviour
                         hitPos.z = Mathf.Round(hitPos.z);
                         Instantiate(breakParticles, hitPos, Quaternion.identity, chunk.transform);
                     }
-                    chunk.GenerateMesh();
+                    chunk.RegenerateChunk();
                 }
             }
         }

@@ -113,19 +113,24 @@ public struct BlockPos
     public static bool operator ==(BlockPos a, BlockPos b) => (a.x == b.x && a.y == b.y && a.z == b.z);
     public static bool operator !=(BlockPos a, BlockPos b) => (a.x != b.x || a.y != b.y || a.z != b.z);
 
+    // Conversion
+    public static explicit operator Vector3(BlockPos pos) => new Vector3(pos.x,pos.y,pos.z);
+    public static implicit operator Vector3Int(BlockPos pos) => new Vector3Int(pos.x,pos.y,pos.z);
+    public static implicit operator BlockPos(Vector3Int pos) => new BlockPos(pos.x,pos.y,pos.z);
+
     // Iterate over all blocks in a specified volume
-    public IEnumerable<BlockPos> BlocksInVolume(BlockPos corner)
+    public static IEnumerable<BlockPos> BlocksInVolume(BlockPos c1, BlockPos c2)
     {
         // Determine the two corners of our volume
         BlockPos a = new BlockPos(
-            Math.Min(x,corner.x),
-            Math.Min(y, corner.y),
-            Math.Min(z, corner.z)
+            Math.Min(c1.x,c2.x),
+            Math.Min(c1.y, c2.y),
+            Math.Min(c1.z, c2.z)
             );
         BlockPos b = new BlockPos(
-            Math.Max(x, corner.x),
-            Math.Max(y, corner.y),
-            Math.Max(z, corner.z)
+            Math.Max(c1.x, c2.x),
+            Math.Max(c1.y, c2.y),
+            Math.Max(c1.z, c2.z)
             );
 
         // Do iteration

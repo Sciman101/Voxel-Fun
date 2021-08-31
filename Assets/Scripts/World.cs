@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class World : MonoBehaviour
 {
@@ -11,6 +9,9 @@ public class World : MonoBehaviour
 
     private void Start()
     {
+        // Time measuring
+        float start = Time.realtimeSinceStartup;
+
         chunks = new Chunk[worldSize.x * worldSize.y * worldSize.z];
         for (int x = 0; x < worldSize.x; x++)
         {
@@ -27,5 +28,7 @@ public class World : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log(string.Format("World generation took {0}s",Time.realtimeSinceStartup-start));
     }
 }
