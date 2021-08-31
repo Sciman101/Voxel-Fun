@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public struct BlockPos
@@ -111,4 +112,32 @@ public struct BlockPos
     // Equality Comparison
     public static bool operator ==(BlockPos a, BlockPos b) => (a.x == b.x && a.y == b.y && a.z == b.z);
     public static bool operator !=(BlockPos a, BlockPos b) => (a.x != b.x || a.y != b.y || a.z != b.z);
+
+    // Iterate over all blocks in a specified volume
+    public IEnumerable<BlockPos> BlocksInVolume(BlockPos corner)
+    {
+        // Determine the two corners of our volume
+        BlockPos a = new BlockPos(
+            Math.Min(x,corner.x),
+            Math.Min(y, corner.y),
+            Math.Min(z, corner.z)
+            );
+        BlockPos b = new BlockPos(
+            Math.Max(x, corner.x),
+            Math.Max(y, corner.y),
+            Math.Max(z, corner.z)
+            );
+
+        // Do iteration
+        for (int x=a.x;x<b.x;x++)
+        {
+            for (int y=a.y;y<b.y;y++)
+            {
+                for (int z=a.z;z<b.z;z++)
+                {
+                    yield return new BlockPos(x,y,z);
+                }
+            }
+        }
+    }
 }
