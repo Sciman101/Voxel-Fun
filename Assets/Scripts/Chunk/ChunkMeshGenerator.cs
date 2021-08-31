@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public static class ChunkMeshGenerator
 {
+    static int maxTris = 0;
+
     private static Vector2Int[] CORNER_OFFSETS = new Vector2Int[] {
         new Vector2Int(-1,-1),
         new Vector2Int(-1,1),
@@ -11,8 +14,13 @@ public static class ChunkMeshGenerator
         new Vector2Int(1,-1),
     };
 
+    static Array faces = Enum.GetValues(typeof(BlockFace));
+
     public static void GenerateMesh(Chunk chunk)
     {
+        Profiler.BeginSample("Chunk generation");
+        maxTris = 0;
+
         // List of triangles/vertices
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
@@ -22,13 +30,13 @@ public static class ChunkMeshGenerator
         foreach (BlockPos pos in BlockPos.BlocksInVolume(BlockPos.zero, BlockPos.one * Chunk.CHUNK_SIZE))
         {
             // Only generate faces for blocks that exist
-            if (chunk.GetBlock(pos) != 0)
+            if (chunk.GetByte(pos) != 0)
             {
                 // Check adjacent faces
-                foreach (BlockFace face in Enum.GetValues(typeof(BlockFace)))
+                foreach (BlockFace face in faces)
                 {
-                    if (chunk.GetBlock(pos.offset(face)) == 0)
-                    {
+                    Block b = World.instance.GetBlock(pos.offset(face));
+                    if (b == null || b.IsTransparent()) {
                         GenerateFace(pos, face, vertices, triangles, uvs);
                     }
                 }
@@ -36,6 +44,7 @@ public static class ChunkMeshGenerator
         }
         // Set data
         chunk.SetMeshData(vertices, triangles, uvs);
+        Profiler.EndSample();
     }
 
     // Add a face to the mesh
@@ -67,6 +76,7 @@ public static class ChunkMeshGenerator
 
         // Generate triangles
         int t = vertices.Count - 4;
+        maxTris = t + 3 > maxTris ? t + 3 : maxTris;
         if (face == BlockFace.TOP || face == BlockFace.SOUTH || face == BlockFace.WEST)
         {
             triangles.Add(t);

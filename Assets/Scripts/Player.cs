@@ -12,9 +12,6 @@ public class Player : MonoBehaviour
     public float moveSpeed;
     public float jumpSpeed;
 
-    [Header("World manipulation")]
-    public GameObject breakParticles;
-
     // Reference to camera
     private Camera camera;
     private float yLook;
@@ -37,41 +34,14 @@ public class Player : MonoBehaviour
         HandleMovement();
         HandleLook();
 
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
             if (Physics.Raycast(camera.transform.position,camera.transform.forward,out hit))
             {
-                Chunk chunk = hit.collider.GetComponent<Chunk>();
-                if (chunk)
-                {
-                    bool breaking = Input.GetMouseButton(0);
-
-                    Vector3Int offset = chunk.chunkPos * Chunk.CHUNK_SIZE;
-                    Vector3 hitPos = hit.point - hit.normal * 0.5f;
-                    Vector3 facePos = hit.point + hit.normal * 0.5f;
-
-                    if (!breaking)
-                    {
-                        hitPos = facePos;
-                    }
-
-                    Vector3Int blockPos = new Vector3Int(
-                        (int)hitPos.x,
-                        (int)hitPos.y,
-                        (int)hitPos.z
-                        ) - offset;
-                    
-                    chunk.SetBlock(blockPos,(byte)(breaking ? 0 : 1));
-                    if (breaking)
-                    {
-                        hitPos.x = Mathf.Round(hitPos.x);
-                        hitPos.y = Mathf.Round(hitPos.y);
-                        hitPos.z = Mathf.Round(hitPos.z);
-                        Instantiate(breakParticles, hitPos, Quaternion.identity, chunk.transform);
-                    }
-                    chunk.RegenerateChunk();
-                }
+                // Convert to block position
+                BlockPos hitPos = new BlockPos(hit.point - hit.normal * 0.5f);
+                World.instance.SetBlock(hitPos, Blocks.AIR);
             }
         }
     }

@@ -47,28 +47,26 @@ public class Chunk : MonoBehaviour
 
         foreach (BlockPos pos in BlockPos.BlocksInVolume(a,b))
         {
-            Vector3 p = (chunkPos * CHUNK_SIZE) + (Vector3Int)pos;
-            SetBlock(pos, (byte)((
-                p.y <= 0 ||
-                Mathf.PerlinNoise(p.x / (float)CHUNK_SIZE, p.z / (float)CHUNK_SIZE) * CHUNK_SIZE >= p.y) ? 1 : 0));
+            if (pos.y <= 8) SetByte(pos,Blocks.DIRT.Id);
         }
-        // Create a mesh from the result
-        RegenerateChunk();
     }
 
     // Tells the chunk to rebuild it's mesh
     public void RegenerateChunk()
     {
+        Debug.Log("Regenerating chunk " + chunkPos);
         ChunkMeshGenerator.GenerateMesh(this);
     }
 
     // Take new mesh data and populate our mesh with it
     public void SetMeshData(List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
     {
+        mesh.Clear();
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
         mesh.SetUVs(0, uvs);
 
+        mesh.RecalculateBounds();
         mesh.RecalculateNormals();
         collider.sharedMesh = mesh;
     }
@@ -82,7 +80,7 @@ public class Chunk : MonoBehaviour
     }
 
     // Get a block at a position
-    public byte GetBlock(BlockPos pos)
+    public byte GetByte(BlockPos pos)
     {
         if (ValidatePos(pos))
         {
@@ -94,13 +92,13 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    public byte GetBlock(Vector3 pos)
+    public byte GetByte(Vector3 pos)
     {
-        return GetBlock(new BlockPos(pos));
+        return GetByte(new BlockPos(pos));
     }
 
     // Set a block at a position
-    public void SetBlock(BlockPos pos, byte block)
+    public void SetByte(BlockPos pos, byte block)
     {
         if (ValidatePos(pos))
         {

@@ -262,7 +262,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.05
   far clip plane: 500
   field of view: 90
   orthographic: 0
@@ -424,7 +424,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76495a5476fc61d438864197b83e72dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldSize: {x: 8, y: 8, z: 8}
   chunkPrefab: {fileID: 5209368728713460295, guid: 376b967ae58b0e94eb3456e0bb59cf10,
     type: 3}
 --- !u!4 &1141280859

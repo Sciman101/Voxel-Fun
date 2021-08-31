@@ -84,6 +84,7 @@ public struct BlockPos
     public static BlockPos operator +(BlockPos a, BlockPos b) => new BlockPos(a.x + b.x, a.y + b.y, a.z + b.z);
     public static BlockPos operator -(BlockPos a, BlockPos b) => new BlockPos(a.x - b.x, a.y - b.y, a.z - b.z);
     public static BlockPos operator *(BlockPos p, int a) => new BlockPos(p.x * a, p.y * a, p.z * a);
+    public static BlockPos operator /(BlockPos p, int a) => new BlockPos(p.x / a, p.y / a, p.z / a);
 
     public int this[int key]
     {
@@ -122,27 +123,29 @@ public struct BlockPos
     public static IEnumerable<BlockPos> BlocksInVolume(BlockPos c1, BlockPos c2)
     {
         // Determine the two corners of our volume
-        BlockPos a = new BlockPos(
-            Math.Min(c1.x,c2.x),
-            Math.Min(c1.y, c2.y),
-            Math.Min(c1.z, c2.z)
-            );
-        BlockPos b = new BlockPos(
-            Math.Max(c1.x, c2.x),
-            Math.Max(c1.y, c2.y),
-            Math.Max(c1.z, c2.z)
-            );
+        int minX = Math.Min(c1.x, c2.x);
+        int minY = Math.Min(c1.y, c2.y);
+        int minZ = Math.Min(c1.z, c2.z);
+
+        int maxX = Math.Max(c1.x, c2.x);
+        int maxY = Math.Max(c1.y, c2.y);
+        int maxZ = Math.Max(c1.z, c2.z);
 
         // Do iteration
-        for (int x=a.x;x<b.x;x++)
+        for (int x=minX;x<maxX;x++)
         {
-            for (int y=a.y;y<b.y;y++)
+            for (int y=minY;y<maxY;y++)
             {
-                for (int z=a.z;z<b.z;z++)
+                for (int z=minZ;z<maxZ;z++)
                 {
                     yield return new BlockPos(x,y,z);
                 }
             }
         }
+    }
+
+    public override string ToString()
+    {
+        return string.Format("[{0}, {1}, {2}]",x,y,z);
     }
 }
