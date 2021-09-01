@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -11,6 +13,7 @@ public class Player : MonoBehaviour
     public float gravity;
     public float moveSpeed;
     public float jumpSpeed;
+    public Text debugText;
 
     // Reference to camera
     private Camera camera;
@@ -19,11 +22,15 @@ public class Player : MonoBehaviour
     CharacterController character;
     private float ySpeed;
 
+    Vector3 startPos;
+
     private void Start()
     {
         // Setup camera
         camera = GetComponentInChildren<Camera>();
         SetCursorLock(true);
+
+        startPos = transform.position;
 
         character = GetComponent<CharacterController>();
     }
@@ -31,8 +38,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        HandleMovement();
         HandleLook();
+        HandleMovement();
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -41,8 +48,21 @@ public class Player : MonoBehaviour
             {
                 // Convert to block position
                 BlockPos hitPos = new BlockPos(hit.point - hit.normal * 0.5f);
+
+                foreach (BlockFace face in Enum.GetValues(typeof(BlockFace)))
+                {
+                //    Debug.Log(face.ToString() + ", " + World.instance.GetBlock(hitPos.offset(face)));
+                }
+
+                //Debug.Log(string.Format("{0} @ {1} in chunk {2}",World.instance.GetBlock(hitPos),hitPos,hitPos/Chunk.CHUNK_SIZE));
                 World.instance.SetBlock(hitPos, Blocks.AIR);
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ySpeed = 0;
+            transform.position = startPos;
         }
     }
 
@@ -64,6 +84,8 @@ public class Player : MonoBehaviour
         motion.y = ySpeed;
 
         character.Move(motion * Time.deltaTime);
+
+        debugText.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}",transform.position.x,transform.position.y,transform.position.z);
     }
     void HandleLook()
     {

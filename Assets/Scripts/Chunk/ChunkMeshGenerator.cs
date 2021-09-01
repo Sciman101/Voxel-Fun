@@ -5,7 +5,11 @@ using UnityEngine.Profiling;
 
 public static class ChunkMeshGenerator
 {
-    static int maxTris = 0;
+
+    // List of triangles/vertices
+    static List<Vector3> vertices = new List<Vector3>();
+    static List<int> triangles = new List<int>();
+    static List<Vector2> uvs = new List<Vector2>();
 
     private static Vector2Int[] CORNER_OFFSETS = new Vector2Int[] {
         new Vector2Int(-1,-1),
@@ -18,25 +22,25 @@ public static class ChunkMeshGenerator
 
     public static void GenerateMesh(Chunk chunk)
     {
-        Profiler.BeginSample("Chunk generation");
-        maxTris = 0;
+        // Reset arrays
+        vertices.Clear();
+        triangles.Clear();
+        uvs.Clear();
 
-        // List of triangles/vertices
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> triangles = new List<int>();
-        List<Vector2> uvs = new List<Vector2>();
+        BlockPos chunkOffset = chunk.chunkPos * Chunk.CHUNK_SIZE;
 
         // Loop through chunk
         foreach (BlockPos pos in BlockPos.BlocksInVolume(BlockPos.zero, BlockPos.one * Chunk.CHUNK_SIZE))
         {
             // Only generate faces for blocks that exist
-            if (chunk.GetByte(pos) != 0)
+            Block b = chunk.GetBlock(pos);
+            if (b != null && b != Blocks.AIR)
             {
                 // Check adjacent faces
                 foreach (BlockFace face in faces)
                 {
-                    Block b = World.instance.GetBlock(pos.offset(face));
-                    if (b == null || b.IsTransparent()) {
+                    Block b1 = World.instance.GetBlock(pos.offset(face)+chunkOffset);
+                    if (b1 == null || b1.IsTransparent()) {
                         GenerateFace(pos, face, vertices, triangles, uvs);
                     }
                 }
@@ -44,10 +48,10 @@ public static class ChunkMeshGenerator
         }
         // Set data
         chunk.SetMeshData(vertices, triangles, uvs);
-        Profiler.EndSample();
     }
 
     // Add a face to the mesh
+    // TODO split this into like 6 different face additions
     private static void GenerateFace(Vector3Int pos, BlockFace face, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
     {
         // Create vertices from direction
@@ -76,7 +80,6 @@ public static class ChunkMeshGenerator
 
         // Generate triangles
         int t = vertices.Count - 4;
-        maxTris = t + 3 > maxTris ? t + 3 : maxTris;
         if (face == BlockFace.TOP || face == BlockFace.SOUTH || face == BlockFace.WEST)
         {
             triangles.Add(t);

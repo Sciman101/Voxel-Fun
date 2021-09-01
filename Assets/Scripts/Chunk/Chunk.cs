@@ -47,7 +47,8 @@ public class Chunk : MonoBehaviour
 
         foreach (BlockPos pos in BlockPos.BlocksInVolume(a,b))
         {
-            if (pos.y <= 8) SetByte(pos,Blocks.DIRT.Id);
+            if (UnityEngine.Random.value > 0.5f)
+                SetBlock(pos, Blocks.DIRT);
         }
     }
 
@@ -80,29 +81,29 @@ public class Chunk : MonoBehaviour
     }
 
     // Get a block at a position
-    public byte GetByte(BlockPos pos)
+    public Block GetBlock(BlockPos pos)
     {
         if (ValidatePos(pos))
         {
-            return blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE];
+            return Blocks.FromId(blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE]);
         }
         else
         {
-            return 0; // Empty block
+            return null; // Empty block
         }
     }
 
-    public byte GetByte(Vector3 pos)
+    public Block GetBlock(Vector3 pos)
     {
-        return GetByte(new BlockPos(pos));
+        return GetBlock(new BlockPos(pos));
     }
 
     // Set a block at a position
-    public void SetByte(BlockPos pos, byte block)
+    public void SetBlock(BlockPos pos, Block block)
     {
         if (ValidatePos(pos))
         {
-            blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE] = block;
+            blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE] = block.Id;
         }
     }
     #endregion

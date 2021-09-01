@@ -20,7 +20,7 @@ public class World : MonoBehaviour
         // Time measuring
         float start = Time.realtimeSinceStartup;
 
-        for (int i=0;i<10;i++)
+        for (int i=0;i<2;i++)
         {
             LoadChunk(Vector3Int.right * i);
         }
@@ -92,8 +92,7 @@ public class World : MonoBehaviour
         if (chunks.ContainsKey(chunkPos))
         {
             Chunk chunk = chunks[chunkPos];
-            byte id = chunk.GetByte(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE));
-            return Blocks.FromId(id);
+            return chunk.GetBlock(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE));
         }
         else
         {
@@ -109,7 +108,7 @@ public class World : MonoBehaviour
         if (chunks.ContainsKey(chunkPos))
         {
             Chunk chunk = chunks[chunkPos];
-            chunk.SetByte(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE),block.Id);
+            chunk.SetBlock(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE),block);
 
             chunksToRegenerate.Enqueue(chunk);
         }

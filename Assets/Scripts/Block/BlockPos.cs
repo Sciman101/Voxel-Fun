@@ -52,12 +52,12 @@ public struct BlockPos
                 return this.offset(0, offset, 0);
             case BlockFace.NORTH:
                 return this.offset(0, 0, offset);
+            case BlockFace.SOUTH:
+                return this.offset(0, 0, -offset);
             case BlockFace.EAST:
                 return this.offset(offset, 0, 0);
             case BlockFace.WEST:
                 return this.offset(-offset, 0, 0);
-            case BlockFace.SOUTH:
-                return this.offset(0, 0, -offset);
         }
         return this;
     }

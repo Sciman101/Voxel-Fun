@@ -49,4 +49,9 @@ public class Block
     {
         return uvCoord;
     }
+
+    public override string ToString()
+    {
+        return string.Format("{0} - id {1}",name,id);
+    }
 }
