@@ -582,7 +582,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lookSpeed: 750
   gravity: 30
-  moveSpeed: 5
+  moveSpeed: 10
   jumpSpeed: 9
   debugText: {fileID: 345960972}
 --- !u!143 &1481255900

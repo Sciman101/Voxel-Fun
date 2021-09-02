@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
@@ -53,10 +51,9 @@ public class Chunk : MonoBehaviour
                 for (int z = 0; z < CHUNK_SIZE; z++)
                 {
                     chunkPos.z = z;
-                    Vector3 samplePos = (Vector3)(chunkPos + (BlockPos)(chunkPos * CHUNK_SIZE)) * 0.05f;
-                    if (Mathf.PerlinNoise(samplePos.x, samplePos.z) > ((float)chunkPos.y) / 16f)
+                    if (chunkPos.y == 8)
                     {
-                        SetBlock(chunkPos, Blocks.DIRT);
+                        SetBlock(chunkPos, Random.value > 0.5f ? Blocks.DIRT : Blocks.STONE);
                     }
                 }
             }

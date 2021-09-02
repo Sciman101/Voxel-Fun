@@ -87,7 +87,11 @@ public class Player : MonoBehaviour
         }
         ySpeed -= gravity * Time.deltaTime;
 
-        Vector3 motion = new Vector3(Input.GetAxis("Horizontal"),0,Input.GetAxis("Vertical")).normalized * moveSpeed;
+        Vector3 motion = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        float amp = motion.sqrMagnitude;
+
+        motion = motion.normalized * moveSpeed * Mathf.Clamp01(amp);
+
         if (Input.GetKey(KeyCode.LeftShift)) motion *= 2;
         motion = transform.TransformDirection(motion);
         motion.y = ySpeed;
