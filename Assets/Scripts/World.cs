@@ -20,7 +20,7 @@ public class World : MonoBehaviour
         // Time measuring
         float start = Time.realtimeSinceStartup;
 
-        for (int i=0;i<2;i++)
+        for (int i=0;i<10;i++)
         {
             LoadChunk(Vector3Int.right * i);
         }

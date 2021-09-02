@@ -15,7 +15,7 @@ public static class Blocks
     {
         AIR = AddBlock(new Block("Air", Vector2.zero, true));
         DIRT = AddBlock(new Block("Dirt"));
-        STONE = AddBlock(new Block("Stone",new Vector2(0.5f,0)));
+        STONE = AddBlock(new Block("Stone",new Vector2(1f/16,0)));
     }
 
     public static Block FromId(byte id)

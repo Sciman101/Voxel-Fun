@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public struct BlockPos
 {
     // Constants
@@ -118,9 +119,11 @@ public struct BlockPos
     public static explicit operator Vector3(BlockPos pos) => new Vector3(pos.x,pos.y,pos.z);
     public static implicit operator Vector3Int(BlockPos pos) => new Vector3Int(pos.x,pos.y,pos.z);
     public static implicit operator BlockPos(Vector3Int pos) => new BlockPos(pos.x,pos.y,pos.z);
+    public static explicit operator BlockPos(Vector3 pos) => new BlockPos((int)pos.x, (int)pos.y, (int)pos.z);
 
     // Iterate over all blocks in a specified volume
-    public static IEnumerable<BlockPos> BlocksInVolume(BlockPos c1, BlockPos c2)
+    // Deprecated due to performance issues
+    /*public static IEnumerable<BlockPos> BlocksInVolume(BlockPos c1, BlockPos c2)
     {
         // Determine the two corners of our volume
         int minX = Math.Min(c1.x, c2.x);
@@ -142,7 +145,7 @@ public struct BlockPos
                 }
             }
         }
-    }
+    }*/
 
     public override string ToString()
     {

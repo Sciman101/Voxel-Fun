@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 public static class ChunkMeshGenerator
 {
-
     // List of triangles/vertices
-    static List<Vector3> vertices = new List<Vector3>();
-    static List<int> triangles = new List<int>();
-    static List<Vector2> uvs = new List<Vector2>();
+    static List<Vector3> vertices = new List<Vector3>(30000);
+    static List<int> triangles = new List<int>(150000);
+    static List<Vector2> uvs = new List<Vector2>(30000);
 
-    private static Vector2Int[] CORNER_OFFSETS = new Vector2Int[] {
-        new Vector2Int(-1,-1),
-        new Vector2Int(-1,1),
-        new Vector2Int(1,1),
-        new Vector2Int(1,-1),
-    };
+    static BlockFace[] faces = (BlockFace[])Enum.GetValues(typeof(BlockFace));
 
-    static Array faces = Enum.GetValues(typeof(BlockFace));
+    // Uv offsets
+    private static readonly Vector2 UV_RIGHT = new Vector2(1f/16,0);
+    private static readonly Vector2 UV_DOWN = new Vector2(0,1f / 16);
+    private static readonly Vector2 UV_CORNER = UV_RIGHT + UV_DOWN;
 
     public static void GenerateMesh(Chunk chunk)
     {
@@ -27,21 +23,34 @@ public static class ChunkMeshGenerator
         triangles.Clear();
         uvs.Clear();
 
-        BlockPos chunkOffset = chunk.chunkPos * Chunk.CHUNK_SIZE;
+        int cs = Chunk.CHUNK_SIZE;
+        BlockPos chunkOffset = chunk.chunkPos * cs;
 
+        BlockPos chunkPos = new BlockPos();
         // Loop through chunk
-        foreach (BlockPos pos in BlockPos.BlocksInVolume(BlockPos.zero, BlockPos.one * Chunk.CHUNK_SIZE))
+        for (int x = 0; x < cs; x++)
         {
-            // Only generate faces for blocks that exist
-            Block b = chunk.GetBlock(pos);
-            if (b != null && b != Blocks.AIR)
+            chunkPos.x = x;
+            for (int y = 0; y < cs; y++)
             {
-                // Check adjacent faces
-                foreach (BlockFace face in faces)
+                chunkPos.y = y;
+                for (int z = 0; z < cs; z++)
                 {
-                    Block b1 = World.instance.GetBlock(pos.offset(face)+chunkOffset);
-                    if (b1 == null || b1.IsTransparent()) {
-                        GenerateFace(pos, face, vertices, triangles, uvs);
+                    chunkPos.z = z;
+                    // Only generate faces for blocks that exist
+                    Block block = chunk.GetBlock(chunkPos);
+                    if (block != null && block.HasMesh())
+                    {
+                        // Check adjacent faces
+                        for (int f=0;f<6;f++) 
+                        {
+                            BlockFace face = faces[f];
+                            Block adjacentBlock = World.instance.GetBlock(chunkPos.offset(face) + chunkOffset);
+                            if (adjacentBlock == null || adjacentBlock.IsTransparent())
+                            {
+                                GenerateFace((Vector3)chunkPos, face, block);
+                            }
+                        }
                     }
                 }
             }
@@ -52,53 +61,69 @@ public static class ChunkMeshGenerator
 
     // Add a face to the mesh
     // TODO split this into like 6 different face additions
-    private static void GenerateFace(Vector3Int pos, BlockFace face, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
+    private static void GenerateFace(Vector3 chunkPos, BlockFace face, Block block)
     {
-        // Create vertices from direction
-        for (int i = 0; i < 4; i++)
+
+        int t = vertices.Count;
+        Vector2 uvCorner = block.GetFaceTextureCoord(face);
+        switch (face)
         {
-            // Figure out the vector to use for the face offset
-            Vector3 vOffset = (Vector3)BlockPos.zero.offset(face);
-            Vector2 corners = CORNER_OFFSETS[i];
-            int c = 0;
-            for (int j = 0; j < 3; j++)
-            {
-                if (vOffset[j] == 0)
-                {
-                    vOffset[j] = corners[c++];
-                }
-            }
-            // Actually put mesh values in place
-            vertices.Add(pos + (vOffset + Vector3.one) * 0.5f);
+
+            case BlockFace.TOP:
+                vertices.Add(chunkPos+new Vector3(0,1,0));
+                vertices.Add(chunkPos+new Vector3(0,1,1));
+                vertices.Add(chunkPos+new Vector3(1,1,1));
+                vertices.Add(chunkPos+new Vector3(1,1,0));
+                break;
+
+            case BlockFace.BOTTOM:  
+                vertices.Add(chunkPos + new Vector3(1, 0, 0));
+                vertices.Add(chunkPos + new Vector3(1, 0, 1));
+                vertices.Add(chunkPos + new Vector3(0, 0, 1));
+                vertices.Add(chunkPos + new Vector3(0, 0, 0));
+                break;
+
+            case BlockFace.NORTH:
+                vertices.Add(chunkPos + new Vector3(1, 0, 1));
+                vertices.Add(chunkPos + new Vector3(1, 1, 1));
+                vertices.Add(chunkPos + new Vector3(0, 1, 1));
+                vertices.Add(chunkPos + new Vector3(0, 0, 1));
+                break;
+
+            case BlockFace.SOUTH:
+                vertices.Add(chunkPos + new Vector3(0, 0, 0));
+                vertices.Add(chunkPos + new Vector3(0, 1, 0));
+                vertices.Add(chunkPos + new Vector3(1, 1, 0));
+                vertices.Add(chunkPos + new Vector3(1, 0, 0));
+                break;
+
+            case BlockFace.EAST:
+                vertices.Add(chunkPos + new Vector3(1, 0, 0));
+                vertices.Add(chunkPos + new Vector3(1, 1, 0));
+                vertices.Add(chunkPos + new Vector3(1, 1, 1));
+                vertices.Add(chunkPos + new Vector3(1, 0, 1));
+                break;
+
+            case BlockFace.WEST:
+                vertices.Add(chunkPos + new Vector3(0, 0, 1));
+                vertices.Add(chunkPos + new Vector3(0, 1, 1));
+                vertices.Add(chunkPos + new Vector3(0, 1, 0));
+                vertices.Add(chunkPos + new Vector3(0, 0, 0));
+                break;
         }
+        // Add triangles
+        triangles.Add(t+1);
+        triangles.Add(t+3);
+        triangles.Add(t);
 
-        uvs.Add(Vector2.right);
-        uvs.Add(Vector2.one);
-        uvs.Add(Vector2.up);
-        uvs.Add(Vector2.zero);
+        triangles.Add(t+3);
+        triangles.Add(t+1);
+        triangles.Add(t+2);
 
-
-        // Generate triangles
-        int t = vertices.Count - 4;
-        if (face == BlockFace.TOP || face == BlockFace.SOUTH || face == BlockFace.WEST)
-        {
-            triangles.Add(t);
-            triangles.Add(t + 1);
-            triangles.Add(t + 3);
-
-            triangles.Add(t + 1);
-            triangles.Add(t + 2);
-            triangles.Add(t + 3);
-        }
-        else
-        {
-            triangles.Add(t + 3);
-            triangles.Add(t + 1);
-            triangles.Add(t);
-
-            triangles.Add(t + 3);
-            triangles.Add(t + 2);
-            triangles.Add(t + 1);
-        }
+        // Add UVS
+        uvs.Add(uvCorner+UV_DOWN);
+        uvs.Add(uvCorner);
+        uvs.Add(uvCorner+UV_RIGHT);
+        uvs.Add(uvCorner+UV_CORNER);
     }
 }

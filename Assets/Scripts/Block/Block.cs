@@ -44,8 +44,14 @@ public class Block
         return isTransparent;
     }
 
+    // Does this block generate a mesh?
+    public bool HasMesh()
+    {
+        return this != Blocks.AIR;
+    }
+
     // Get the coordinate for a face texture of the block
-    public Vector2 GetFaceTextureCoord(BlockPos pos, BlockFace face)
+    public Vector2 GetFaceTextureCoord(BlockFace face)
     {
         return uvCoord;
     }

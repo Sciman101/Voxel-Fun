@@ -42,20 +42,31 @@ public class Chunk : MonoBehaviour
     // Generate an intresting structure
     void GenerateBlocks()
     {
-        BlockPos a = BlockPos.zero;
-        BlockPos b = BlockPos.one * CHUNK_SIZE;
-
-        foreach (BlockPos pos in BlockPos.BlocksInVolume(a,b))
+        BlockPos chunkPos = new BlockPos();
+        // Loop through chunk
+        for (int x = 0; x < CHUNK_SIZE; x++)
         {
-            if (UnityEngine.Random.value > 0.5f)
-                SetBlock(pos, Blocks.DIRT);
+            chunkPos.x = x;
+            for (int y = 0; y < CHUNK_SIZE; y++)
+            {
+                chunkPos.y = y;
+                for (int z = 0; z < CHUNK_SIZE; z++)
+                {
+                    chunkPos.z = z;
+                    Vector3 samplePos = (Vector3)(chunkPos + (BlockPos)(chunkPos * CHUNK_SIZE)) * 0.05f;
+                    if (Mathf.PerlinNoise(samplePos.x, samplePos.z) > ((float)chunkPos.y) / 16f)
+                    {
+                        SetBlock(chunkPos, Blocks.DIRT);
+                    }
+                }
+            }
         }
     }
 
     // Tells the chunk to rebuild it's mesh
     public void RegenerateChunk()
     {
-        Debug.Log("Regenerating chunk " + chunkPos);
+        //Debug.Log("Regenerating chunk " + chunkPos);
         ChunkMeshGenerator.GenerateMesh(this);
     }
 

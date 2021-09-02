@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    private static readonly string[] DIRECTIONS = new string[]{ "North (+Z)", "East (+X)","South (-Z)","West (-X)",};
+
     [Header("Camera Control")]
     public float lookSpeed;
 
@@ -41,7 +43,7 @@ public class Player : MonoBehaviour
         HandleLook();
         HandleMovement();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
         {
             RaycastHit hit;
             if (Physics.Raycast(camera.transform.position,camera.transform.forward,out hit))
@@ -55,7 +57,14 @@ public class Player : MonoBehaviour
                 }
 
                 //Debug.Log(string.Format("{0} @ {1} in chunk {2}",World.instance.GetBlock(hitPos),hitPos,hitPos/Chunk.CHUNK_SIZE));
-                World.instance.SetBlock(hitPos, Blocks.AIR);
+                if (Input.GetMouseButton(0))
+                {
+                    World.instance.SetBlock(hitPos, Blocks.AIR);
+                }
+                else
+                {
+                    World.instance.SetBlock(hitPos+(BlockPos)hit.normal, Blocks.DIRT);
+                }
             }
         }
 
@@ -85,7 +94,8 @@ public class Player : MonoBehaviour
 
         character.Move(motion * Time.deltaTime);
 
-        debugText.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}",transform.position.x,transform.position.y,transform.position.z);
+        int dir = (int)Math.Round(transform.localEulerAngles.y / 90) % 4;
+        debugText.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}\nFacing:{3}",transform.position.x,transform.position.y,transform.position.z, DIRECTIONS[dir]);
     }
     void HandleLook()
     {
