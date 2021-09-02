@@ -22,16 +22,15 @@ public class Chunk : MonoBehaviour
     // Block data
     byte[] blocks = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
+    // Chunk properties
+    public bool isEmpty = true; // Is this chunk only air blocks?
+
     private void Start()
     {
         // Get components
         renderer = GetComponent<MeshRenderer>();
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
-
-        // Setup mesh
-        filter.mesh = mesh = new Mesh();
-        mesh.name = "Chunk";
 
         GenerateBlocks();
     }
@@ -70,6 +69,13 @@ public class Chunk : MonoBehaviour
     // Take new mesh data and populate our mesh with it
     public void SetMeshData(List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
     {
+        if (mesh == null)
+        {
+            // Setup mesh
+            filter.mesh = mesh = new Mesh();
+            mesh.name = "Chunk";
+        }
+
         mesh.Clear();
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);

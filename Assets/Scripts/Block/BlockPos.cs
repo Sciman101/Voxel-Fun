@@ -63,6 +63,7 @@ public struct BlockPos
         return this;
     }
 
+
     public override bool Equals(object obj)
     {
         return obj is BlockPos pos &&

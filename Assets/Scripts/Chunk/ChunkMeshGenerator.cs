@@ -18,6 +18,8 @@ public static class ChunkMeshGenerator
 
     public static void GenerateMesh(Chunk chunk)
     {
+        chunk.isEmpty = true;
+
         // Reset arrays
         vertices.Clear();
         triangles.Clear();
@@ -41,6 +43,7 @@ public static class ChunkMeshGenerator
                     Block block = chunk.GetBlock(chunkPos);
                     if (block != null && block.HasMesh())
                     {
+                        chunk.isEmpty = false;
                         // Check adjacent faces
                         for (int f=0;f<6;f++) 
                         {
