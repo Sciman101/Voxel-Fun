@@ -6,7 +6,6 @@ public static class TerrainGenerator
     public static void GenerateChunkTerrain(Chunk chunk)
     {
         Vector3Int chunkPos = chunk.chunkPos;
-        if (chunkPos.y > 2) return; // Skip air stuff
 
         int cs = Chunk.CHUNK_SIZE;
         // Loop through chunk

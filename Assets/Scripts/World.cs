@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class World : MonoBehaviour
 {
@@ -53,7 +54,7 @@ public class World : MonoBehaviour
         player.onPlayerChunkChanged.AddListener((pos) =>
         {
             // Check for adequate distance
-            {
+            if ((lastReloadChunkPos-pos).sqrMagnitude >= 9){
                 lastReloadChunkPos = pos;
                 LoadChunksAround(pos, CHUNK_LOAD_RADIUS);
             }
@@ -84,13 +85,12 @@ public class World : MonoBehaviour
             }
             chunkPositionsToLoad.Clear();
         }
-
+        
         // Regenerate all chunks that need to be regenerated
         while (chunksToRegenerate.Count > 0)
         {
             chunksToRegenerate.Dequeue().RegenerateChunk();
         }
-
         // Track how long the update took
         if (startTime != -1)
         {

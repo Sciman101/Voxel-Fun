@@ -18,7 +18,7 @@ public class DebugInfo : MonoBehaviour
     {
 
         int dir = (int)Mathf.Round(player.transform.localEulerAngles.y / 90) % 4;
-        text.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}\nFacing:{3}\nChunks loaded: {4}\nPooled chunks remaining: {5}\nLast chunk update time: {6:0.##}s",
+        text.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}\nFacing:{3}\nChunks loaded: {4}\nPooled chunks remaining: {5}\nLast chunk update time: {6:0.####}s",
             player.transform.position.x, player.transform.position.y, player.transform.position.z,
             DIRECTIONS[dir],
             World.instance.NumLoadedChunks,

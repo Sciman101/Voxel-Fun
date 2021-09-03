@@ -109,9 +109,9 @@ public class Player : MonoBehaviour
     }
     void HandleLook()
     {
-        transform.Rotate(Input.GetAxis("Mouse X") * Time.deltaTime * lookSpeed * Vector3.up);
+        transform.Rotate(Input.GetAxisRaw("Mouse X") * Time.deltaTime * lookSpeed * Vector3.up);
         // Vertical look
-        yLook -= Input.GetAxis("Mouse Y") * Time.deltaTime * lookSpeed;
+        yLook -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * lookSpeed;
         yLook = Mathf.Clamp(yLook, -90, 90);
         camera.transform.localEulerAngles = Vector3.right * yLook;
 
