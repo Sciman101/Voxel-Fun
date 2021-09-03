@@ -3,9 +3,15 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    // How far out should chunks be loaded?
+    private static readonly int CHUNK_LOAD_RADIUS = 5;
+
     public static World instance;
 
     public GameObject chunkPrefab;
+    public Player player;
+
+    Vector3Int lastChunkLoadPoint;
 
     private Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
 
@@ -25,9 +31,19 @@ public class World : MonoBehaviour
         // Time measuring
         float start = Time.realtimeSinceStartup;
 
-        LoadChunksAround(Vector3Int.zero,8);
+        LoadChunksAround(Vector3Int.zero, CHUNK_LOAD_RADIUS);
 
         Debug.Log(string.Format("World generation took {0}s",Time.realtimeSinceStartup-start));
+
+        player.onPlayerChunkChanged.AddListener((pos) =>
+        {
+            if ((lastChunkLoadPoint - pos).sqrMagnitude >= 16)
+            {
+                Debug.Log("loading new chunks...");
+                LoadChunksAround(pos, CHUNK_LOAD_RADIUS);
+                lastChunkLoadPoint = pos;
+            }
+        });
     }
 
 
@@ -63,11 +79,16 @@ public class World : MonoBehaviour
 
     #region Chunk Handling
 
-    // Loads all chunks around a point, optionally unloads chunks not within range
-    void LoadChunksAround(BlockPos pos, int radius, bool unloadOthers=true)
+    // Get the chunk a world position is in
+    public Vector3Int GetChunkPos(Vector3 pos)
     {
-        // Get the chunk position
-        Vector3Int chunkPos = pos.GetChunkPos();
+        pos /= Chunk.CHUNK_SIZE;
+        return new Vector3Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
+    }
+
+    // Loads all chunks around a point, optionally unloads chunks not within range
+    void LoadChunksAround(Vector3Int chunkPos, int radius, bool unloadOthers=true)
+    {
 
         // Set up every chunk to be unloaded
         foreach (Vector3Int cPos in chunks.Keys)
@@ -84,7 +105,7 @@ public class World : MonoBehaviour
                 {
                     Vector3Int offset = new Vector3Int(x, y, z);
                     // Check if chunk is within radius
-                    if (offset.magnitude <= radius)
+                    if (Mathf.Abs(x)+Mathf.Abs(y)+Mathf.Abs(z) <= radius)
                     {
                         chunkPositionsToLoad.Add(chunkPos+offset);
                         chunkPositionsToUnload.Remove(chunkPos+offset);

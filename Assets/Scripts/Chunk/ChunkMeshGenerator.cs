@@ -47,10 +47,6 @@ public static class ChunkMeshGenerator
                         for (int f=0;f<6;f++) 
                         {
                             BlockFace face = faces[f];
-                            if (chunk.chunkPos.x < 0 || chunk.chunkPos.y < 0 || chunk.chunkPos.z < 0)
-                            {
-                                int p = 0;
-                            }
                             BlockPos sjfksd = chunk.Chunk2World(blockInChunkPos).offset(face);
                             Block adjacentBlock = World.instance.GetBlock(sjfksd);
                             if (adjacentBlock == null || adjacentBlock.IsTransparent())

@@ -21,21 +21,14 @@ public static class TerrainGenerator
 
                     Vector3 sampler = (Vector3)blockPos * .05f;
 
-                    float AB = Mathf.PerlinNoise(sampler.x,sampler.y);
-                    float BC = Mathf.PerlinNoise(sampler.y,sampler.z);
-                    float AC = Mathf.PerlinNoise(sampler.x,sampler.z);
+                    int h = (int)(Mathf.PerlinNoise(sampler.x,sampler.z)*20);
 
-                    float BA = Mathf.PerlinNoise(sampler.y, sampler.x);
-                    float CB = Mathf.PerlinNoise(sampler.z, sampler.y);
-                    float CA = Mathf.PerlinNoise(sampler.z, sampler.x);
-
-                    float avg = (AB + BC + AC + BA + CB + CA) / 6;
-
-                    bool fill = avg > 0f;
-
-                    if (fill)
+                    if (h == blockPos.y)
                     {
-                        chunk.SetBlock(blockPosInChunk, Blocks.STONE);
+                        chunk.SetBlock(blockPosInChunk, Blocks.GRASS);
+                    }else if (blockPos.y < h)
+                    {
+                        chunk.SetBlock(blockPosInChunk, Blocks.DIRT);
                     }
 
                 }

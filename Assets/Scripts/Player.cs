@@ -2,7 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
+
+[System.Serializable]
+public class ChunkPositionEvent : UnityEvent<Vector3Int> {}
 
 public class Player : MonoBehaviour
 {
@@ -17,6 +21,8 @@ public class Player : MonoBehaviour
     public float jumpSpeed;
     public Text debugText;
 
+    public ChunkPositionEvent onPlayerChunkChanged = new ChunkPositionEvent();
+
     // Reference to camera
     private Camera camera;
     private float yLook;
@@ -26,15 +32,17 @@ public class Player : MonoBehaviour
 
     Vector3 startPos;
 
+    Vector3Int chunkPos;
+
     private void Start()
     {
         // Setup camera
         camera = GetComponentInChildren<Camera>();
         SetCursorLock(true);
+        character = GetComponent<CharacterController>();
 
         startPos = transform.position;
-
-        character = GetComponent<CharacterController>();
+        chunkPos = World.instance.GetChunkPos(transform.position);
     }
 
     // Update is called once per frame
@@ -67,6 +75,14 @@ public class Player : MonoBehaviour
         {
             ySpeed = 0;
             transform.position = startPos;
+        }
+
+        // Update chunk pos
+        Vector3Int newChunkPos = World.instance.GetChunkPos(transform.position);
+        if (newChunkPos != chunkPos)
+        {
+            chunkPos = newChunkPos;
+            onPlayerChunkChanged.Invoke(chunkPos);
         }
     }
 
