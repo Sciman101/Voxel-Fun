@@ -30,6 +30,10 @@ public static class TerrainGenerator
                     {
                         chunk.SetBlock(blockPosInChunk, Blocks.DIRT);
                     }
+                    else
+                    {
+                        chunk.SetBlock(blockPosInChunk, Blocks.AIR);
+                    }
 
                 }
             }

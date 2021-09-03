@@ -1,25 +1,42 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class World : MonoBehaviour
 {
     // How far out should chunks be loaded?
     private static readonly int CHUNK_LOAD_RADIUS = 5;
+    private static readonly int MAX_CHUNKS = 250;
 
     public static World instance;
 
-    public GameObject chunkPrefab;
     public Player player;
+    public GameObject chunkPrefab;
 
-    Vector3Int lastChunkLoadPoint;
 
-    private Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
+    // Pool containing all chunks we can pull from
+    private Queue<Chunk> chunkPool = new Queue<Chunk>(MAX_CHUNKS);
 
-    // Used for non-immediate chunk loading
+    // Dictionary of currently loaded chunks
+    public Dictionary<Vector3Int, Chunk> loadedChunks = new Dictionary<Vector3Int, Chunk>(MAX_CHUNKS);
+
+    // Queues used for late-updating chunks
+    private Queue<Chunk> chunksToRegenerate = new Queue<Chunk>(MAX_CHUNKS);
+    private HashSet<Chunk> chunksToUnload = new HashSet<Chunk>();
     private HashSet<Vector3Int> chunkPositionsToLoad = new HashSet<Vector3Int>();
-    private HashSet<Vector3Int> chunkPositionsToUnload = new HashSet<Vector3Int>();
 
-    private Queue<Chunk> chunksToRegenerate = new Queue<Chunk>();
+    public int NumLoadedChunks
+    {
+        get => loadedChunks.Count;
+    }
+    public int ChunkPoolCount
+    {
+        get => chunkPool.Count;
+    }
+
+    public float lastChunkUpdateTime = 0;
+
+    Vector3Int lastReloadChunkPos;
 
     private void Awake()
     {
@@ -28,140 +45,187 @@ public class World : MonoBehaviour
 
     private void Start()
     {
-        // Time measuring
-        float start = Time.realtimeSinceStartup;
+        // Create pool of chunks to load from
+        InitializePool();
 
         LoadChunksAround(Vector3Int.zero, CHUNK_LOAD_RADIUS);
 
-        Debug.Log(string.Format("World generation took {0}s",Time.realtimeSinceStartup-start));
-
         player.onPlayerChunkChanged.AddListener((pos) =>
         {
-            if ((lastChunkLoadPoint - pos).sqrMagnitude >= 16)
+            // Check for adequate distance
             {
-                Debug.Log("loading new chunks...");
+                lastReloadChunkPos = pos;
                 LoadChunksAround(pos, CHUNK_LOAD_RADIUS);
-                lastChunkLoadPoint = pos;
             }
         });
     }
 
-
+    // Regenerate and load queued chunks
     private void LateUpdate()
     {
-        // Unload queued chunks
-        if (chunkPositionsToUnload.Count > 0)
+        float startTime = -1;
+        // unload uneeded chunks
+        if (chunksToUnload.Count > 0)
         {
-            foreach (Vector3Int chunkPos in chunkPositionsToUnload)
-                UnloadChunk(chunkPos);
-            chunkPositionsToUnload.Clear();
+            startTime = Time.realtimeSinceStartup;
+            foreach (Chunk chunk in chunksToUnload)
+            {
+                UnloadChunkImmediate(chunk);
+            }
+            chunksToUnload.Clear();
         }
 
-        // Load queued chunks
+        // Load needed chunks
         if (chunkPositionsToLoad.Count > 0)
         {
-            foreach (Vector3Int chunkPos in chunkPositionsToLoad)
-                LoadChunk(chunkPos);
+            foreach (Vector3Int pos in chunkPositionsToLoad)
+            {
+                LoadChunkImmediate(pos);
+            }
             chunkPositionsToLoad.Clear();
         }
 
-        // Update any chunks that need it
-        if (chunksToRegenerate.Count > 0)
+        // Regenerate all chunks that need to be regenerated
+        while (chunksToRegenerate.Count > 0)
         {
-            foreach (Chunk c in chunksToRegenerate)
-            {
-                c.RegenerateChunk();
-            }
-            chunksToRegenerate.Clear();
+            chunksToRegenerate.Dequeue().RegenerateChunk();
+        }
+
+        // Track how long the update took
+        if (startTime != -1)
+        {
+            lastChunkUpdateTime = Time.realtimeSinceStartup - startTime;
         }
     }
 
-
     #region Chunk Handling
-
-    // Get the chunk a world position is in
     public Vector3Int GetChunkPos(Vector3 pos)
     {
         pos /= Chunk.CHUNK_SIZE;
         return new Vector3Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y), Mathf.FloorToInt(pos.z));
     }
 
-    // Loads all chunks around a point, optionally unloads chunks not within range
-    void LoadChunksAround(Vector3Int chunkPos, int radius, bool unloadOthers=true)
+    // If a chunk exists, add it to the load queue
+    private void TryReloadChunk(Vector3Int pos)
     {
-
-        // Set up every chunk to be unloaded
-        foreach (Vector3Int cPos in chunks.Keys)
+        if (loadedChunks.ContainsKey(pos))
         {
-            chunkPositionsToUnload.Add(cPos);
-        }
-
-        // Figure out which chunks to load
-        for (int x=-radius;x<=radius;x++)
-        {
-            for (int y = -radius; y <= radius; y++)
-            {
-                for (int z = -radius; z <= radius; z++)
-                {
-                    Vector3Int offset = new Vector3Int(x, y, z);
-                    // Check if chunk is within radius
-                    if (Mathf.Abs(x)+Mathf.Abs(y)+Mathf.Abs(z) <= radius)
-                    {
-                        chunkPositionsToLoad.Add(chunkPos+offset);
-                        chunkPositionsToUnload.Remove(chunkPos+offset);
-                    }
-                }
-            }
+            chunksToRegenerate.Enqueue(loadedChunks[pos]);
         }
     }
 
-    // Load a chunk at the given chunk pos
-    void LoadChunk(Vector3Int pos)
+    // Load all the chunks in a radius around a center, unloading chunks that need to be unloaded
+    public void LoadChunksAround(Vector3Int center, int radius)
+    {
+        // Register every chunk to be unloaded
+        foreach (Chunk chunk in loadedChunks.Values)
+        {
+            chunksToUnload.Add(chunk);
+        }
+
+        // Loop over region
+        for (int x=-radius;x<=radius;x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int z = -radius; z <= radius; z++)
+                {
+                    // Check if chunk is in loading range
+                    if (Math.Abs(x) + Math.Abs(y) + Math.Abs(z) <= radius)
+                    {
+                        Vector3Int pos = center + new Vector3Int(x,y,z);
+                        
+                        if (loadedChunks.ContainsKey(pos))
+                        {
+                            // If this chunk was already loaded, remove it from the unload list
+                            chunksToUnload.Remove(loadedChunks[pos]);
+                        }
+                        else
+                        {
+                            // Tell it to load
+                            chunkPositionsToLoad.Add(pos);
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    public void LoadChunk(Vector3Int pos)
+    {
+        chunkPositionsToLoad.Add(pos);
+    }
+
+    public void UnloadChunk(Vector3Int pos)
+    {
+        if (loadedChunks.ContainsKey(pos))
+        {
+            chunksToUnload.Add(loadedChunks[pos]);
+        }
+    }
+
+    // Load a chunk at the given position
+    public void LoadChunkImmediate(Vector3Int pos)
     {
         // Make sure the chunk is already loaded
-        if (chunks.ContainsKey(pos))
+        if (loadedChunks.ContainsKey(pos))
         {
             Debug.LogWarning("Trying to load existing chunk at " + pos);
             return;
         }
 
-        // Create object (TODO use pooling for this)
-        GameObject chunkGo = Instantiate(chunkPrefab, pos * Chunk.CHUNK_SIZE, Quaternion.identity, transform);
-        chunkGo.name = "Chunk " + pos.ToString();
+        // Get a chunk from the queue
+        if (chunkPool.Count <= 0)
+        {
+            // This chunk is already enabled, we ran out of chunks
+            Debug.LogError("Error loading chunk at position " + pos + ",Out of chunks to load!");
+            return;
+        }
 
-        // Setup the chunk
-        Chunk chunk = chunkGo.GetComponent<Chunk>();
-        chunk.chunkPos = pos;
+        Chunk chunk = chunkPool.Dequeue();
+
+        // Enable the chunk
+        chunk.gameObject.SetActive(true);
+        chunk.SetPosition(pos);
 
         // Tell the chunk what to do
         TerrainGenerator.GenerateChunkTerrain(chunk);
 
         // Add to dictionary
-        chunks[pos] = chunk;
+        loadedChunks[pos] = chunk;
         chunksToRegenerate.Enqueue(chunk);
     }
 
-    void UnloadChunk(Vector3Int pos)
+    // Immediately unload a chunk
+    public void UnloadChunkImmediate(Chunk chunk)
     {
         // Make sure the chunk is already loaded
-        if (chunks.ContainsKey(pos))
+        if (loadedChunks.ContainsKey(chunk.chunkPos))
         {
-            Chunk chunk = chunks[pos];
-            Destroy(chunk.gameObject);
-            chunks.Remove(pos);
+            loadedChunks.Remove(chunk.chunkPos);
+            chunk.gameObject.SetActive(false);
+            // Add back to pool
+            chunkPool.Enqueue(chunk);
         }
         else
         {
-            Debug.LogWarning("Trying to unload nonexistent chunk at " + pos);
+            Debug.LogWarning("Trying to unload nonexistent chunk at " + chunk.chunkPos);
         }
     }
 
-    // Try and reload a chunk by position
-    void TryReloadChunk(Vector3Int pos)
+    // Create the pool of chunk gameobjects to pull from
+    private void InitializePool()
     {
-        if (chunks.ContainsKey(pos))
+        for (int i = 0; i < MAX_CHUNKS; i++)
         {
-            chunksToRegenerate.Enqueue(chunks[pos]);
+            GameObject chunkGo = Instantiate(chunkPrefab, transform);
+            chunkGo.SetActive(false);
+
+            Chunk chunk = chunkGo.GetComponent<Chunk>();
+            chunkPool.Enqueue(chunk);
         }
     }
     #endregion
@@ -172,9 +236,9 @@ public class World : MonoBehaviour
     {
         // Figure out the chunk this belongs to
         Vector3Int chunkPos = pos.GetChunkPos();
-        if (chunks.ContainsKey(chunkPos))
+        if (loadedChunks.ContainsKey(chunkPos))
         {
-            Chunk chunk = chunks[chunkPos];
+            Chunk chunk = loadedChunks[chunkPos];
             return chunk.GetBlock(chunk.World2Chunk(pos));
         }
         else
@@ -188,9 +252,9 @@ public class World : MonoBehaviour
     {
         // Figure out the chunk this belongs to
         Vector3Int chunkPos = pos.GetChunkPos();
-        if (chunks.ContainsKey(chunkPos))
+        if (loadedChunks.ContainsKey(chunkPos))
         {
-            Chunk chunk = chunks[chunkPos];
+            Chunk chunk = loadedChunks[chunkPos];
             BlockPos posInChunk = chunk.World2Chunk(pos);
             chunk.SetBlock(posInChunk, block);
 

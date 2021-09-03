@@ -60,6 +60,14 @@ public class Chunk : MonoBehaviour
         collider.sharedMesh = mesh;
     }
 
+    // Set the position of this chunk
+    public void SetPosition(Vector3Int pos)
+    {
+        chunkPos = pos;
+        transform.position = pos * CHUNK_SIZE;
+        gameObject.name = "Chunk " + pos;
+    }
+
     #region Coordinate Conversion
     public BlockPos Chunk2World(BlockPos pos)
     {

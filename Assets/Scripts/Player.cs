@@ -10,7 +10,6 @@ public class ChunkPositionEvent : UnityEvent<Vector3Int> {}
 
 public class Player : MonoBehaviour
 {
-    private static readonly string[] DIRECTIONS = new string[]{ "North (+Z)", "East (+X)","South (-Z)","West (-X)",};
 
     [Header("Camera Control")]
     public float lookSpeed;
@@ -19,7 +18,6 @@ public class Player : MonoBehaviour
     public float gravity;
     public float moveSpeed;
     public float jumpSpeed;
-    public Text debugText;
 
     public ChunkPositionEvent onPlayerChunkChanged = new ChunkPositionEvent();
 
@@ -108,9 +106,6 @@ public class Player : MonoBehaviour
         motion.y = ySpeed;
 
         character.Move(motion * Time.deltaTime);
-
-        int dir = (int)Math.Round(transform.localEulerAngles.y / 90) % 4;
-        debugText.text = string.Format("X:{0:0.##}\nY:{1:0.##}\nZ:{2:0.##}\nFacing:{3}",transform.position.x,transform.position.y,transform.position.z, DIRECTIONS[dir]);
     }
     void HandleLook()
     {
