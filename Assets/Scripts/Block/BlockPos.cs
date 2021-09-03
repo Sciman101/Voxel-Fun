@@ -43,12 +43,12 @@ public struct BlockPos
     // Offset this position by a 
     public BlockPos offset(int x, int y, int z) => new BlockPos(this.x+x,this.y+y,this.z+z);
     // Offset this position by a face
-    public BlockPos offset(BlockFace face, int offset=1)
+    public BlockPos offset(BlockFace face, int offset = 1)
     {
         switch (face)
         {
             case BlockFace.BOTTOM:
-                return this.offset(0,-offset,0);
+                return this.offset(0, -offset, 0);
             case BlockFace.TOP:
                 return this.offset(0, offset, 0);
             case BlockFace.NORTH:
@@ -61,6 +61,15 @@ public struct BlockPos
                 return this.offset(-offset, 0, 0);
         }
         return this;
+    }
+
+
+    // Figure out what chunk this block exists in
+    public Vector3Int GetChunkPos()
+    {
+        // TODO make this not suck
+        Vector3 temp = (((Vector3)this) / Chunk.CHUNK_SIZE);
+        return new Vector3Int(Mathf.FloorToInt(temp.x), Mathf.FloorToInt(temp.y), Mathf.FloorToInt(temp.z));
     }
 
 
@@ -87,6 +96,7 @@ public struct BlockPos
     public static BlockPos operator -(BlockPos a, BlockPos b) => new BlockPos(a.x - b.x, a.y - b.y, a.z - b.z);
     public static BlockPos operator *(BlockPos p, int a) => new BlockPos(p.x * a, p.y * a, p.z * a);
     public static BlockPos operator /(BlockPos p, int a) => new BlockPos(p.x / a, p.y / a, p.z / a);
+    public static BlockPos operator %(BlockPos p, int a) => new BlockPos(p.x % a, p.y % a, p.z % a);
 
     public int this[int key]
     {

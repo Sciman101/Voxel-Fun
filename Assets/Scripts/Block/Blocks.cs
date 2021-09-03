@@ -9,6 +9,7 @@ public static class Blocks
     public static readonly Block AIR;
     public static readonly Block DIRT;
     public static readonly Block STONE;
+    public static readonly Block GRASS;
 
     // Set up all the blocks
     static Blocks()
@@ -16,6 +17,7 @@ public static class Blocks
         AIR = AddBlock(new Block("Air", Vector2.zero, true));
         DIRT = AddBlock(new Block("Dirt"));
         STONE = AddBlock(new Block("Stone",new Vector2(1f/16,0)));
+        GRASS = AddBlock(new BlockGrass("Grass"));
     }
 
     public static Block FromId(byte id)

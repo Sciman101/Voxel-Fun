@@ -25,38 +25,12 @@ public class Chunk : MonoBehaviour
     // Chunk properties
     public bool isEmpty = true; // Is this chunk only air blocks?
 
-    private void Start()
+    private void Awake()
     {
         // Get components
         renderer = GetComponent<MeshRenderer>();
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
-
-        GenerateBlocks();
-    }
-
-
-    // Generate an intresting structure
-    void GenerateBlocks()
-    {
-        BlockPos chunkPos = new BlockPos();
-        // Loop through chunk
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
-            chunkPos.x = x;
-            for (int y = 0; y < CHUNK_SIZE; y++)
-            {
-                chunkPos.y = y;
-                for (int z = 0; z < CHUNK_SIZE; z++)
-                {
-                    chunkPos.z = z;
-                    if (chunkPos.y == 8)
-                    {
-                        SetBlock(chunkPos, Random.value > 0.5f ? Blocks.DIRT : Blocks.STONE);
-                    }
-                }
-            }
-        }
     }
 
     // Tells the chunk to rebuild it's mesh
@@ -85,6 +59,18 @@ public class Chunk : MonoBehaviour
         mesh.RecalculateNormals();
         collider.sharedMesh = mesh;
     }
+
+    #region Coordinate Conversion
+    public BlockPos Chunk2World(BlockPos pos)
+    {
+        return pos + (BlockPos)(chunkPos * CHUNK_SIZE);
+    }
+
+    public BlockPos World2Chunk(BlockPos pos)
+    {
+        return pos - (BlockPos)pos.GetChunkPos() * CHUNK_SIZE;
+    }
+    #endregion
 
     #region Block Handling
     // Make sure a position exists in the chunk

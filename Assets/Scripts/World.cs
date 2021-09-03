@@ -67,7 +67,7 @@ public class World : MonoBehaviour
     void LoadChunksAround(BlockPos pos, int radius, bool unloadOthers=true)
     {
         // Get the chunk position
-        Vector3Int chunkPos = pos / Chunk.CHUNK_SIZE;
+        Vector3Int chunkPos = pos.GetChunkPos();
 
         // Set up every chunk to be unloaded
         foreach (Vector3Int cPos in chunks.Keys)
@@ -112,6 +112,9 @@ public class World : MonoBehaviour
         Chunk chunk = chunkGo.GetComponent<Chunk>();
         chunk.chunkPos = pos;
 
+        // Tell the chunk what to do
+        TerrainGenerator.GenerateChunkTerrain(chunk);
+
         // Add to dictionary
         chunks[pos] = chunk;
         chunksToRegenerate.Enqueue(chunk);
@@ -131,6 +134,15 @@ public class World : MonoBehaviour
             Debug.LogWarning("Trying to unload nonexistent chunk at " + pos);
         }
     }
+
+    // Try and reload a chunk by position
+    void TryReloadChunk(Vector3Int pos)
+    {
+        if (chunks.ContainsKey(pos))
+        {
+            chunksToRegenerate.Enqueue(chunks[pos]);
+        }
+    }
     #endregion
 
     #region Block Handling
@@ -138,11 +150,11 @@ public class World : MonoBehaviour
     public Block GetBlock(BlockPos pos)
     {
         // Figure out the chunk this belongs to
-        Vector3Int chunkPos = pos / Chunk.CHUNK_SIZE;
+        Vector3Int chunkPos = pos.GetChunkPos();
         if (chunks.ContainsKey(chunkPos))
         {
             Chunk chunk = chunks[chunkPos];
-            return chunk.GetBlock(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE));
+            return chunk.GetBlock(chunk.World2Chunk(pos));
         }
         else
         {
@@ -154,13 +166,26 @@ public class World : MonoBehaviour
     public void SetBlock(BlockPos pos, Block block)
     {
         // Figure out the chunk this belongs to
-        Vector3Int chunkPos = pos / Chunk.CHUNK_SIZE;
+        Vector3Int chunkPos = pos.GetChunkPos();
         if (chunks.ContainsKey(chunkPos))
         {
             Chunk chunk = chunks[chunkPos];
-            chunk.SetBlock(pos - (BlockPos)(chunk.chunkPos * Chunk.CHUNK_SIZE),block);
+            BlockPos posInChunk = chunk.World2Chunk(pos);
+            chunk.SetBlock(posInChunk, block);
 
             chunksToRegenerate.Enqueue(chunk);
+
+            int cs = Chunk.CHUNK_SIZE-1;
+
+            // Check for additional chunks to update, if this block was on a chunk edge
+            if (posInChunk.x == 0) TryReloadChunk(chunkPos+Vector3Int.left);
+            else if (posInChunk.x == cs) TryReloadChunk(chunkPos+Vector3Int.right);
+
+            if (posInChunk.y == 0) TryReloadChunk(chunkPos + Vector3Int.down);
+            else if (posInChunk.y == cs) TryReloadChunk(chunkPos + Vector3Int.up);
+
+            if (posInChunk.z == 0) TryReloadChunk(chunkPos + new Vector3Int(0,0,-1));
+            else if (posInChunk.z == cs) TryReloadChunk(chunkPos + new Vector3Int(0, 0, 1));
         }
         else
         {

@@ -49,12 +49,7 @@ public class Player : MonoBehaviour
             if (Physics.Raycast(camera.transform.position,camera.transform.forward,out hit))
             {
                 // Convert to block position
-                BlockPos hitPos = new BlockPos(hit.point - hit.normal * 0.5f);
-
-                foreach (BlockFace face in Enum.GetValues(typeof(BlockFace)))
-                {
-                //    Debug.Log(face.ToString() + ", " + World.instance.GetBlock(hitPos.offset(face)));
-                }
+                BlockPos hitPos = new BlockPos(hit.point - hit.normal * 0.1f);
 
                 //Debug.Log(string.Format("{0} @ {1} in chunk {2}",World.instance.GetBlock(hitPos),hitPos,hitPos/Chunk.CHUNK_SIZE));
                 if (Input.GetMouseButton(0))

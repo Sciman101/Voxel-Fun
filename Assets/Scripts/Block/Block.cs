@@ -39,19 +39,19 @@ public class Block
     }
 
     // Should adjacent blocks render faces for this?
-    public bool IsTransparent()
+    public virtual bool IsTransparent()
     {
         return isTransparent;
     }
 
     // Does this block generate a mesh?
-    public bool HasMesh()
+    public virtual bool HasMesh()
     {
         return this != Blocks.AIR;
     }
 
     // Get the coordinate for a face texture of the block
-    public Vector2 GetFaceTextureCoord(BlockFace face)
+    public virtual Vector2 GetFaceTextureCoord(BlockFace face)
     {
         return uvCoord;
     }

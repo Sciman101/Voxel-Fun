@@ -13,8 +13,8 @@ public static class ChunkMeshGenerator
 
     // Uv offsets
     private static readonly Vector2 UV_RIGHT = new Vector2(1f/16,0);
-    private static readonly Vector2 UV_DOWN = new Vector2(0,1f / 16);
-    private static readonly Vector2 UV_CORNER = UV_RIGHT + UV_DOWN;
+    private static readonly Vector2 UV_UP = new Vector2(0,1f / 16);
+    private static readonly Vector2 UV_CORNER = UV_RIGHT + UV_UP;
 
     public static void GenerateMesh(Chunk chunk)
     {
@@ -26,21 +26,20 @@ public static class ChunkMeshGenerator
         uvs.Clear();
 
         int cs = Chunk.CHUNK_SIZE;
-        BlockPos chunkOffset = chunk.chunkPos * cs;
 
-        BlockPos chunkPos = new BlockPos();
+        BlockPos blockInChunkPos = new BlockPos();
         // Loop through chunk
         for (int x = 0; x < cs; x++)
         {
-            chunkPos.x = x;
+            blockInChunkPos.x = x;
             for (int y = 0; y < cs; y++)
             {
-                chunkPos.y = y;
+                blockInChunkPos.y = y;
                 for (int z = 0; z < cs; z++)
                 {
-                    chunkPos.z = z;
+                    blockInChunkPos.z = z;
                     // Only generate faces for blocks that exist
-                    Block block = chunk.GetBlock(chunkPos);
+                    Block block = chunk.GetBlock(blockInChunkPos);
                     if (block != null && block.HasMesh())
                     {
                         chunk.isEmpty = false;
@@ -48,10 +47,15 @@ public static class ChunkMeshGenerator
                         for (int f=0;f<6;f++) 
                         {
                             BlockFace face = faces[f];
-                            Block adjacentBlock = World.instance.GetBlock(chunkPos.offset(face) + chunkOffset);
+                            if (chunk.chunkPos.x < 0 || chunk.chunkPos.y < 0 || chunk.chunkPos.z < 0)
+                            {
+                                int p = 0;
+                            }
+                            BlockPos sjfksd = chunk.Chunk2World(blockInChunkPos).offset(face);
+                            Block adjacentBlock = World.instance.GetBlock(sjfksd);
                             if (adjacentBlock == null || adjacentBlock.IsTransparent())
                             {
-                                GenerateFace((Vector3)chunkPos, face, block);
+                                GenerateFace((Vector3)blockInChunkPos, face, block);
                             }
                         }
                     }
@@ -71,7 +75,6 @@ public static class ChunkMeshGenerator
         Vector2 uvCorner = block.GetFaceTextureCoord(face);
         switch (face)
         {
-
             case BlockFace.TOP:
                 vertices.Add(chunkPos+new Vector3(0,1,0));
                 vertices.Add(chunkPos+new Vector3(0,1,1));
@@ -124,9 +127,9 @@ public static class ChunkMeshGenerator
         triangles.Add(t+2);
 
         // Add UVS
-        uvs.Add(uvCorner+UV_DOWN);
         uvs.Add(uvCorner);
-        uvs.Add(uvCorner+UV_RIGHT);
+        uvs.Add(uvCorner+UV_UP);
         uvs.Add(uvCorner+UV_CORNER);
+        uvs.Add(uvCorner+UV_RIGHT);
     }
 }
