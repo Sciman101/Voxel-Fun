@@ -11,6 +11,7 @@ public static class Blocks
     public static readonly Block STONE;
     public static readonly Block GRASS;
     public static readonly Block LOG;
+    public static readonly Block GRASS_PLANT;
 
     // Set up all the blocks
     static Blocks()
@@ -20,6 +21,7 @@ public static class Blocks
         STONE = AddBlock(new Block("Stone",new Vector2(1f/16,0)));
         GRASS = AddBlock(new BlockGrass("Grass"));
         LOG = AddBlock(new BlockLog("Log"));
+        GRASS_PLANT = AddBlock(new BlockGrassPlant("Tall Grass"));
     }
 
     public static Block FromId(byte id)

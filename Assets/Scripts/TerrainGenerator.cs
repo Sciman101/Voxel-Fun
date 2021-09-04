@@ -51,6 +51,16 @@ public static class TerrainGenerator
                     {
                         chunk.SetBlock(blockPosInChunk, Blocks.GRASS);
                     }
+                    else if (h == blockPos.y - 1)
+                    {
+                        lock (random)
+                        {
+                            if (random.NextDouble() < .05)
+                            {
+                                chunk.SetBlock(blockPosInChunk, Blocks.GRASS_PLANT);
+                            }
+                        }
+                    }
                     else if (blockPos.y < h)
                     {
                         chunk.SetBlock(blockPosInChunk, Blocks.DIRT);

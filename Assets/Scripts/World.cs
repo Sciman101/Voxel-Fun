@@ -129,7 +129,7 @@ public class World : MonoBehaviour
         // Loop over region
         for (int x=-radius;x<=radius;x++)
         {
-            for (int y = -1; y <= 3; y++)
+            for (int y = -1; y <= 4; y++)
             {
                 for (int z = -radius; z <= radius; z++)
                 {

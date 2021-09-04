@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Block
 {
@@ -44,6 +45,12 @@ public class Block
         return isTransparent;
     }
 
+    // Does this block occupy a full cube?
+    public virtual bool IsFullCube()
+    {
+        return true;
+    }
+
     // Does this block generate a mesh?
     public virtual bool HasMesh()
     {
@@ -54,6 +61,13 @@ public class Block
     public virtual Vector2 GetFaceTextureCoord(BlockFace face)
     {
         return uvCoord;
+    }
+
+    // Add a custom mesh to the world
+    // Will only call if IsFullCube is false
+    public virtual void GenerateCustomMesh(BlockPos pos, Vector3 posInChunk, List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
+    {
+
     }
 
     public override string ToString()

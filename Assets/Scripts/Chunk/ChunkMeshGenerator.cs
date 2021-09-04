@@ -55,16 +55,24 @@ public static class ChunkMeshGenerator
                     if (block != null && block.HasMesh())
                     {
                         chunk.isEmpty = false;
-                        // Check adjacent faces
-                        for (int f=0;f<6;f++) 
+                        // Handle full cube rendering
+                        if (block.IsFullCube())
                         {
-                            BlockFace face = faces[f];
-                            BlockPos sjfksd = chunk.Chunk2World(blockInChunkPos).offset(face);
-                            Block adjacentBlock = World.instance.GetBlock(sjfksd);
-                            if (adjacentBlock == null || adjacentBlock.IsTransparent())
+                            // Check adjacent faces
+                            for (int f = 0; f < 6; f++)
                             {
-                                GenerateFace((Vector3)blockInChunkPos, face, block, mesh);
+                                BlockFace face = faces[f];
+                                Block adjacentBlock = World.instance.GetBlock(chunk.Chunk2World(blockInChunkPos).offset(face));
+                                if (adjacentBlock == null || adjacentBlock.IsTransparent())
+                                {
+                                    GenerateFace((Vector3)blockInChunkPos, face, block, mesh);
+                                }
                             }
+                        }
+                        else
+                        {
+                            // Add a custom mesh
+                            block.GenerateCustomMesh(chunk.Chunk2World(blockInChunkPos), (Vector3)blockInChunkPos, mesh.vertices,mesh.triangles,mesh.uvs);
                         }
                     }
                 }
