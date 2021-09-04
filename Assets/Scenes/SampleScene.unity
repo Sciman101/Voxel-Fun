@@ -766,8 +766,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 350
-  gravity: 30
-  moveSpeed: 6
+  gravity: 0
+  moveSpeed: 15
   jumpSpeed: 9
   onPlayerChunkChanged:
     m_PersistentCalls:

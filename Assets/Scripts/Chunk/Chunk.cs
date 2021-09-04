@@ -17,7 +17,7 @@ public class Chunk : MonoBehaviour
     MeshFilter filter;
     MeshCollider collider;
 
-    private Mesh mesh;
+    public ChunkMesh mesh;
 
     // Block data
     byte[] blocks = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
@@ -31,33 +31,23 @@ public class Chunk : MonoBehaviour
         renderer = GetComponent<MeshRenderer>();
         filter = GetComponent<MeshFilter>();
         collider = GetComponent<MeshCollider>();
+
+        mesh = new ChunkMesh(filter,collider);
     }
 
     // Tells the chunk to rebuild it's mesh
     public void RegenerateChunk()
     {
+        renderer.enabled = false;
         //Debug.Log("Regenerating chunk " + chunkPos);
-        ChunkMeshGenerator.GenerateMesh(this);
+        //ChunkMeshGenerator.GenerateMesh(this);
+        ChunkMeshGenerator.RequestChunkMesh(this,UploadMeshData);
     }
 
-    // Take new mesh data and populate our mesh with it
-    public void SetMeshData(List<Vector3> vertices, List<int> triangles, List<Vector2> uvs)
+    public static void UploadMeshData(Chunk chunk)
     {
-        if (mesh == null)
-        {
-            // Setup mesh
-            filter.mesh = mesh = new Mesh();
-            mesh.name = "Chunk";
-        }
-
-        mesh.Clear();
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
-        mesh.SetUVs(0, uvs);
-
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-        collider.sharedMesh = mesh;
+        chunk.mesh.Upload();
+        chunk.renderer.enabled = true;
     }
 
     // Set the position of this chunk

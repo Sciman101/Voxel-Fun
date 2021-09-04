@@ -96,6 +96,8 @@ public class World : MonoBehaviour
         {
             lastChunkUpdateTime = Time.realtimeSinceStartup - startTime;
         }
+
+        ChunkMeshGenerator.Update();
     }
 
     #region Chunk Handling
