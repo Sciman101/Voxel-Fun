@@ -27,17 +27,14 @@ public static class ChunkMeshGenerator
 
         int cs = Chunk.CHUNK_SIZE;
 
-        BlockPos blockInChunkPos = new BlockPos();
         // Loop through chunk
         for (int x = 0; x < cs; x++)
         {
-            blockInChunkPos.x = x;
             for (int y = 0; y < cs; y++)
             {
-                blockInChunkPos.y = y;
                 for (int z = 0; z < cs; z++)
                 {
-                    blockInChunkPos.z = z;
+                    BlockPos blockInChunkPos = new BlockPos(x,y,z);
                     // Only generate faces for blocks that exist
                     Block block = chunk.GetBlock(blockInChunkPos);
                     if (block != null && block.HasMesh())

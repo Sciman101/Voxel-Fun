@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public struct BlockPos
+public readonly struct BlockPos
 {
     // Constants
     public static readonly BlockPos zero = new BlockPos(0, 0, 0);
@@ -16,9 +16,9 @@ public struct BlockPos
     public static readonly BlockPos left = new BlockPos(-1, 0, 0);
 
     // Coordinate
-    public int x;
-    public int y;
-    public int z;
+    public readonly int x;
+    public readonly int y;
+    public readonly int z;
 
     // Default constructor
     public BlockPos(int x, int y, int z)
@@ -107,16 +107,6 @@ public struct BlockPos
                 case 0: return x;
                 case 1: return y;
                 case 2: return z;
-                default: throw new IndexOutOfRangeException();
-            }
-        }
-        set
-        {
-            switch (key)
-            {
-                case 0: x = value; break;
-                case 1: y = value; break;
-                case 2: z = value; break;
                 default: throw new IndexOutOfRangeException();
             }
         }
