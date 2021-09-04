@@ -9,14 +9,10 @@ public class ChunkMesh
     public readonly List<int> triangles;
     public readonly List<Vector2> uvs;
 
-    private MeshCollider collider;
-
-    public ChunkMesh(MeshFilter filter, MeshCollider collider)
+    public ChunkMesh(MeshFilter filter)
     {
         mesh = new Mesh();
         filter.sharedMesh = mesh;
-
-        this.collider = collider;
 
         vertices = new List<Vector3>(30000);
         triangles = new List<int>(150000);
@@ -33,8 +29,6 @@ public class ChunkMesh
 
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-
-        collider.sharedMesh = mesh;
     }
 
 }

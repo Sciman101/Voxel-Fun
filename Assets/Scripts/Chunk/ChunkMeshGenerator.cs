@@ -11,11 +11,11 @@ public static class ChunkMeshGenerator
     private static readonly Vector2 UV_UP = new Vector2(0,1f / 16);
     private static readonly Vector2 UV_CORNER = UV_RIGHT + UV_UP;
 
-    static Queue<ThreadCallbackInfo<Chunk>> chunkThreadCallbackQueue = new Queue<ThreadCallbackInfo<Chunk>>();
+    static Queue<Chunk.ChunkCallback<Chunk>> chunkThreadCallbackQueue = new Queue<Chunk.ChunkCallback<Chunk>>();
 
     public static void Update()
     {
-        while (chunkThreadCallbackQueue.Count > 0)
+        if (chunkThreadCallbackQueue.Count > 0)
         {
             chunkThreadCallbackQueue.Dequeue().Invoke();
         }
@@ -73,7 +73,7 @@ public static class ChunkMeshGenerator
 
         lock(chunkThreadCallbackQueue)
         {
-            chunkThreadCallbackQueue.Enqueue(new ThreadCallbackInfo<Chunk>(callback,chunk));
+            chunkThreadCallbackQueue.Enqueue(new Chunk.ChunkCallback<Chunk>(callback,chunk));
         }
     }
 
@@ -142,22 +142,5 @@ public static class ChunkMeshGenerator
         mesh.uvs.Add(uvCorner+UV_UP);
         mesh.uvs.Add(uvCorner+UV_CORNER);
         mesh.uvs.Add(uvCorner+UV_RIGHT);
-    }
-
-
-    private readonly struct ThreadCallbackInfo<T>
-    {
-        public readonly Action<T> callback;
-        public readonly T parameter;
-        public ThreadCallbackInfo(Action<T> callback, T parameter)
-        {
-            this.callback = callback;
-            this.parameter = parameter;
-        }
-
-        public void Invoke()
-        {
-            callback(parameter);
-        }
     }
 }

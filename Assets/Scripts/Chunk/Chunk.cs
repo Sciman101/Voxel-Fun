@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
@@ -8,7 +9,7 @@ public class Chunk : MonoBehaviour
     // How big is a chunk on a side?
     // Keeping this at 16 due to mesh data limits
     // Maybe make blocks share common vertices?
-    public const int CHUNK_SIZE = 16;
+    public const int CHUNK_SIZE = 24;
 
     public Vector3Int chunkPos;
 
@@ -30,15 +31,13 @@ public class Chunk : MonoBehaviour
         // Get components
         renderer = GetComponent<MeshRenderer>();
         filter = GetComponent<MeshFilter>();
-        collider = GetComponent<MeshCollider>();
 
-        mesh = new ChunkMesh(filter,collider);
+        mesh = new ChunkMesh(filter);
     }
 
     // Tells the chunk to rebuild it's mesh
     public void RegenerateChunk()
     {
-        renderer.enabled = false;
         //Debug.Log("Regenerating chunk " + chunkPos);
         //ChunkMeshGenerator.GenerateMesh(this);
         ChunkMeshGenerator.RequestChunkMesh(this,UploadMeshData);
@@ -46,8 +45,8 @@ public class Chunk : MonoBehaviour
 
     public static void UploadMeshData(Chunk chunk)
     {
+        chunk.SetVisible(true);
         chunk.mesh.Upload();
-        chunk.renderer.enabled = true;
     }
 
     // Set the position of this chunk
@@ -56,6 +55,11 @@ public class Chunk : MonoBehaviour
         chunkPos = pos;
         transform.position = pos * CHUNK_SIZE;
         gameObject.name = "Chunk " + pos;
+    }
+
+    public void SetVisible(bool vis)
+    {
+        renderer.enabled = vis;
     }
 
     #region Coordinate Conversion
@@ -105,4 +109,20 @@ public class Chunk : MonoBehaviour
         }
     }
     #endregion
+
+    public readonly struct ChunkCallback<T>
+    {
+        public readonly Action<T> callback;
+        public readonly T parameter;
+        public ChunkCallback(Action<T> callback, T parameter)
+        {
+            this.callback = callback;
+            this.parameter = parameter;
+        }
+
+        public void Invoke()
+        {
+            callback(parameter);
+        }
+    }
 }

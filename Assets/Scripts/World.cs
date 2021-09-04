@@ -6,12 +6,12 @@ using UnityEngine.Profiling;
 public class World : MonoBehaviour
 {
     // How far out should chunks be loaded?
-    private static readonly int CHUNK_LOAD_RADIUS = 5;
-    private static readonly int MAX_CHUNKS = 250;
+    private static readonly int CHUNK_LOAD_RADIUS = 7;
+    private static readonly int MAX_CHUNKS = 600;
 
     public static World instance;
 
-    public Player player;
+    public ChunkPositionUpdateReporter playerChunkPositionUpdateReporter;
     public GameObject chunkPrefab;
 
 
@@ -51,7 +51,7 @@ public class World : MonoBehaviour
 
         LoadChunksAround(Vector3Int.zero, CHUNK_LOAD_RADIUS);
 
-        player.onPlayerChunkChanged.AddListener((pos) =>
+        playerChunkPositionUpdateReporter.onChunkPositionChanged.AddListener((pos) =>
         {
             // Check for adequate distance
             if ((lastReloadChunkPos-pos).sqrMagnitude >= 9){
@@ -98,6 +98,7 @@ public class World : MonoBehaviour
         }
 
         ChunkMeshGenerator.Update();
+        TerrainGenerator.Update();
     }
 
     #region Chunk Handling
@@ -128,7 +129,7 @@ public class World : MonoBehaviour
         // Loop over region
         for (int x=-radius;x<=radius;x++)
         {
-            for (int y = -1; y <= 1; y++)
+            for (int y = -1; y <= 3; y++)
             {
                 for (int z = -radius; z <= radius; z++)
                 {
@@ -191,14 +192,19 @@ public class World : MonoBehaviour
 
         // Enable the chunk
         chunk.gameObject.SetActive(true);
+        chunk.SetVisible(false);
         chunk.SetPosition(pos);
 
         // Tell the chunk what to do
-        TerrainGenerator.GenerateChunkTerrain(chunk);
+        TerrainGenerator.RequestChunkTerrainGeneration(chunk, QueueChunkForRegeneration);
 
         // Add to dictionary
         loadedChunks[pos] = chunk;
-        chunksToRegenerate.Enqueue(chunk);
+    }
+
+    public static void QueueChunkForRegeneration(Chunk chunk)
+    {
+        World.instance.chunksToRegenerate.Enqueue(chunk);
     }
 
     // Immediately unload a chunk
