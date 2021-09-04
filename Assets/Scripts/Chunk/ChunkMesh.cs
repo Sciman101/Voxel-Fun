@@ -12,16 +12,19 @@ public class ChunkMesh
     public ChunkMesh(MeshFilter filter)
     {
         mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         filter.sharedMesh = mesh;
 
-        vertices = new List<Vector3>(30000);
-        triangles = new List<int>(150000);
-        uvs = new List<Vector2>(30000);
+        vertices = new List<Vector3>(200000);
+        triangles = new List<int>(200000*3);
+        uvs = new List<Vector2>(200000);
     }
 
     public void Upload()
     {
         mesh.Clear();
+
+        int submeshCount = (vertices.Count / 65535) + 1;
 
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);

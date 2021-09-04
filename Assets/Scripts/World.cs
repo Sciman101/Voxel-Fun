@@ -6,8 +6,8 @@ using UnityEngine.Profiling;
 public class World : MonoBehaviour
 {
     // How far out should chunks be loaded?
-    private static readonly int CHUNK_LOAD_RADIUS = 7;
-    private static readonly int MAX_CHUNKS = 600;
+    private static readonly int CHUNK_LOAD_RADIUS = 5;
+    private static readonly int MAX_CHUNKS = 250;
 
     public static World instance;
 
@@ -54,7 +54,7 @@ public class World : MonoBehaviour
         playerChunkPositionUpdateReporter.onChunkPositionChanged.AddListener((pos) =>
         {
             // Check for adequate distance
-            if ((lastReloadChunkPos-pos).sqrMagnitude >= 9){
+            if ((lastReloadChunkPos-pos).sqrMagnitude >= 4){
                 lastReloadChunkPos = pos;
                 LoadChunksAround(pos, CHUNK_LOAD_RADIUS);
             }
@@ -133,6 +133,7 @@ public class World : MonoBehaviour
             {
                 for (int z = -radius; z <= radius; z++)
                 {
+                    if (x == radius || x == -radius || z == radius || z == -radius) continue;
                     // Check if chunk is in loading range
                     if (Math.Abs(x) + Math.Abs(y) + Math.Abs(z) <= radius)
                     {

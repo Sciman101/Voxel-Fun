@@ -7,16 +7,13 @@ public class Chunk : MonoBehaviour
 {
 
     // How big is a chunk on a side?
-    // Keeping this at 16 due to mesh data limits
-    // Maybe make blocks share common vertices?
-    public const int CHUNK_SIZE = 24;
+    public const int CHUNK_SIZE = 32;
 
     public Vector3Int chunkPos;
 
     // Mesh display
     new MeshRenderer renderer;
     MeshFilter filter;
-    MeshCollider collider;
 
     public ChunkMesh mesh;
 
