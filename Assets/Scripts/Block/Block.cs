@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class Block
 {
-    private byte id;
-    private readonly string name;
-    private Vector2 uvCoord;
-    private bool isTransparent;
+    protected byte id;
+    protected readonly string name;
+    protected Vector2 uvCoord;
+    protected bool isTransparent;
 
     public byte Id {
         get => id;

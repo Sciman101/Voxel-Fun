@@ -9,6 +9,8 @@ public static class TerrainGenerator
 
     static System.Random random = new System.Random();
 
+    static int WATERLEVEL = 8;
+
     public static void Update()
     {
         if (chunkThreadCallbackQueue.Count > 0)
@@ -45,17 +47,28 @@ public static class TerrainGenerator
 
                     Vector3 sampler = (Vector3)blockPos * .05f;
 
-                    int h = (int)(Mathf.PerlinNoise(sampler.x, sampler.z) * 20);
+                    chunk.SetBlock(blockPosInChunk, Blocks.AIR);
 
+                    int h = (int)(Mathf.PerlinNoise(sampler.x, sampler.z) * 20);
+                    int h2 = (int)(Mathf.PerlinNoise(sampler.x+0.434384f, sampler.z+0.2389349f) * 20);
+
+                    if (blockPos.y < WATERLEVEL)
+                    {
+                        chunk.SetBlock(blockPosInChunk, Blocks.WATER);
+                    }
                     if (h == blockPos.y)
                     {
-                        chunk.SetBlock(blockPosInChunk, Blocks.GRASS);
+                        chunk.SetBlock(blockPosInChunk, blockPos.y < WATERLEVEL-1 ? Blocks.STONE : Blocks.GRASS);
                     }
                     else if (h == blockPos.y - 1)
                     {
                         lock (random)
                         {
-                            if (random.NextDouble() < .05)
+                            if (random.NextDouble() < .01)
+                            {
+                               chunk.SetBlock(blockPosInChunk, Blocks.FLOWER);
+                            }
+                            else if (random.NextDouble() < .05)
                             {
                                 chunk.SetBlock(blockPosInChunk, Blocks.GRASS_PLANT);
                             }
@@ -63,11 +76,14 @@ public static class TerrainGenerator
                     }
                     else if (blockPos.y < h)
                     {
-                        chunk.SetBlock(blockPosInChunk, Blocks.DIRT);
-                    }
-                    else
-                    {
-                        chunk.SetBlock(blockPosInChunk, Blocks.AIR);
+                        if (blockPos.y <= h2)
+                        {
+                            chunk.SetBlock(blockPosInChunk, Blocks.STONE);
+                        }
+                        else
+                        {
+                            chunk.SetBlock(blockPosInChunk, Blocks.DIRT);
+                        }
                     }
 
                 }

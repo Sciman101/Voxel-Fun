@@ -63,7 +63,7 @@ public static class ChunkMeshGenerator
                             {
                                 BlockFace face = faces[f];
                                 Block adjacentBlock = World.instance.GetBlock(chunk.Chunk2World(blockInChunkPos).offset(face));
-                                if (adjacentBlock == null || adjacentBlock.IsTransparent())
+                                if (adjacentBlock == null || (adjacentBlock.IsTransparent() && !(block == Blocks.WATER && adjacentBlock == Blocks.WATER)))
                                 {
                                     GenerateFace((Vector3)blockInChunkPos, face, block, mesh);
                                 }

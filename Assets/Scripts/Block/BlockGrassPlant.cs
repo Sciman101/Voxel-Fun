@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BlockGrassPlant : Block
 {
-    public BlockGrassPlant(string name) : base(name)
+    public BlockGrassPlant(string name, Vector2 uvCoord) : base(name, uvCoord)
     {
     }
 
@@ -16,10 +16,10 @@ public class BlockGrassPlant : Block
         vertices.Add(posInChunk+new Vector3(1,1,1));
         vertices.Add(posInChunk+new Vector3(1,0,1));
 
-        uvs.Add(new Vector2(6f/16,0));
-        uvs.Add(new Vector2(6f/16,1f/16));
-        uvs.Add(new Vector2(7f/16,1f/16));
-        uvs.Add(new Vector2(7f/16,0));
+        uvs.Add(uvCoord);
+        uvs.Add(uvCoord+new Vector2(0,1f/16));
+        uvs.Add(uvCoord+new Vector2(1f/16,1f/16));
+        uvs.Add(uvCoord+new Vector2(1f/16,0));
 
         triangles.Add(t);
         triangles.Add(t+1);
@@ -41,10 +41,10 @@ public class BlockGrassPlant : Block
         vertices.Add(posInChunk + new Vector3(1, 1, 0));
         vertices.Add(posInChunk + new Vector3(1, 0, 0));
 
-        uvs.Add(new Vector2(6f / 16, 0));
-        uvs.Add(new Vector2(6f / 16, 1f / 16));
-        uvs.Add(new Vector2(7f / 16, 1f / 16));
-        uvs.Add(new Vector2(7f / 16, 0));
+        uvs.Add(uvCoord);
+        uvs.Add(uvCoord + new Vector2(0, 1f / 16));
+        uvs.Add(uvCoord + new Vector2(1f / 16, 1f / 16));
+        uvs.Add(uvCoord + new Vector2(1f / 16, 0));
 
         triangles.Add(t);
         triangles.Add(t + 1);
