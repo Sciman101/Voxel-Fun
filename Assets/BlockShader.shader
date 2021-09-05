@@ -25,9 +25,6 @@
                 float4 screenPos : TEXCOORD2;
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-
             v2f vert (appdata_base v)
             {
                 v2f o;
@@ -35,8 +32,12 @@
                 o.uv = v.texcoord;
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.screenPos = ComputeScreenPos(o.vertex);
+
                 return o;
             }
+
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
 
             fixed4 frag(v2f i) : SV_Target
             {
@@ -49,18 +50,14 @@
                 };
 
                 fixed4 col = tex2D(_MainTex, i.uv);
-                clip(col.a == 0 ? -1 : 1);
 
                 float2 pixelPos = i.screenPos.xy / i.screenPos.w * _ScreenParams.xy;
                 float threshold = thresholdMatrix[pixelPos.x % 4][pixelPos.y % 4] / 17;
                 clip(col.a - threshold);
 
                 // Darken horizontal faces
-                float hor = 1 - abs(i.worldNormal.x);
-                float ver = 1 - abs(i.worldNormal.y);
-
-                col *= lerp(1, 0.8, hor);
-                col *= lerp(1,0.6,ver);
+                col *= abs(i.worldNormal.x) > 0.99 ? 0.8 : 1;
+                col *= abs(i.worldNormal.z) > 0.99 ? 0.6 : 1;
 
                 return col;
             }

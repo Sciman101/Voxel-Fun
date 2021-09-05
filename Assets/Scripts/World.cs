@@ -7,7 +7,7 @@ public class World : MonoBehaviour
 {
     // How far out should chunks be loaded?
     private static readonly int CHUNK_LOAD_RADIUS = 5;
-    private static readonly int MAX_CHUNKS = 250;
+    private static readonly int MAX_CHUNKS = 500;
 
     public static World instance;
 
@@ -135,7 +135,7 @@ public class World : MonoBehaviour
                 {
                     if (x == radius || x == -radius || z == radius || z == -radius) continue;
                     // Check if chunk is in loading range
-                    if (Math.Abs(x) + Math.Abs(y) + Math.Abs(z) <= radius)
+                    if (Math.Abs(x) + Math.Abs(z) <= radius)
                     {
                         Vector3Int pos = center + new Vector3Int(x,y,z);
                         
