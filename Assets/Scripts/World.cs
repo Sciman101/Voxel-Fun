@@ -7,7 +7,7 @@ public class World : MonoBehaviour
 {
     // How far out should chunks be loaded?
     private static readonly int CHUNK_LOAD_RADIUS = 5;
-    private static readonly int MAX_CHUNKS = 500;
+    private static readonly int MAX_CHUNKS = 1000;
 
     public static World instance;
 
@@ -85,7 +85,7 @@ public class World : MonoBehaviour
             }
             chunkPositionsToLoad.Clear();
         }
-        
+
         // Regenerate all chunks that need to be regenerated
         while (chunksToRegenerate.Count > 0)
         {
@@ -129,27 +129,22 @@ public class World : MonoBehaviour
         // Loop over region
         for (int x=-radius;x<=radius;x++)
         {
-            for (int y = -1; y <= 4; y++)
+            for (int y = -radius/2; y <= radius/2; y++)
             {
                 for (int z = -radius; z <= radius; z++)
                 {
-                    if (x == radius || x == -radius || z == radius || z == -radius) continue;
                     // Check if chunk is in loading range
-                    if (Math.Abs(x) + Math.Abs(z) <= radius)
-                    {
-                        Vector3Int pos = center + new Vector3Int(x,y,z);
+                    Vector3Int pos = center + new Vector3Int(x,y,z);
                         
-                        if (loadedChunks.ContainsKey(pos))
-                        {
-                            // If this chunk was already loaded, remove it from the unload list
-                            chunksToUnload.Remove(loadedChunks[pos]);
-                        }
-                        else
-                        {
-                            // Tell it to load
-                            chunkPositionsToLoad.Add(pos);
-                        }
-
+                    if (loadedChunks.ContainsKey(pos))
+                    {
+                        // If this chunk was already loaded, remove it from the unload list
+                        chunksToUnload.Remove(loadedChunks[pos]);
+                    }
+                    else
+                    {
+                        // Tell it to load
+                        chunkPositionsToLoad.Add(pos);
                     }
                 }
 

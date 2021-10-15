@@ -92,6 +92,11 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    public Block GetBlockUnchecked(BlockPos pos)
+    {
+        return Blocks.FromId(blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE]);
+    }
+
     public Block GetBlock(Vector3 pos)
     {
         return GetBlock(new BlockPos(pos));

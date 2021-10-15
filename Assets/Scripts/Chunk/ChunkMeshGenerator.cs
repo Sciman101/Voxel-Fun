@@ -51,7 +51,7 @@ public static class ChunkMeshGenerator
                 {
                     BlockPos blockInChunkPos = new BlockPos(x,y,z);
                     // Only generate faces for blocks that exist
-                    Block block = chunk.GetBlock(blockInChunkPos);
+                    Block block = chunk.GetBlockUnchecked(blockInChunkPos);
                     if (block != null && block.HasMesh())
                     {
                         chunk.isEmpty = false;
