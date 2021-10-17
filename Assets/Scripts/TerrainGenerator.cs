@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Threading;
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 
@@ -22,11 +23,7 @@ public static class TerrainGenerator
     // Generate the terrain for a chunk
     public static void RequestChunkTerrainGeneration(Chunk chunk,Action<Chunk> callback)
     {
-        ThreadStart threadStart = delegate
-        {
-            GenerateChunkTerrainThread(chunk, callback);
-        };
-        new Thread(threadStart).Start();
+        Task.Factory.StartNew(() => GenerateChunkTerrainThread(chunk, callback));
     }
 
 

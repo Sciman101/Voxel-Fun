@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,11 +24,7 @@ public static class ChunkMeshGenerator
 
     public static void RequestChunkMesh(Chunk chunk, Action<Chunk> callback)
     {
-        ThreadStart threadStart = delegate
-        {
-            GenerateMeshThread(chunk, callback);
-        };
-        new Thread(threadStart).Start();
+        Task.Factory.StartNew(() => GenerateMeshThread(chunk, callback));
     }
 
     public static void GenerateMeshThread(Chunk chunk, Action<Chunk> callback)

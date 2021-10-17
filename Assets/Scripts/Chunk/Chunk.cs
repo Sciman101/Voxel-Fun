@@ -1,15 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer),typeof(MeshFilter))]
 public class Chunk : MonoBehaviour
 {
+    private const short INLINE = 256; // MethodImplOptions.AggressiveInlining;
+    private const short OPTIMISE = 512; // MethodImplOptions.AggressiveOptimization;
 
     // How big is a chunk on a side?
     public const int CHUNK_SIZE = 32;
 
+    public enum ChunkState
+    {
+        Inactive, // The chunk has no data and is in an ideal state to be used
+        Hidden, // The chunk has valid block data but no/invalid mesh
+        Statis, // The chunk has valid block data and a valid mesh, but is invisible, typically at the boundaries of the play area
+        Active, // The chunk is being rendered and used
+    }
+
     public Vector3Int chunkPos;
+
+    // Chunk state
+    private ChunkState chunkState;
+    public ChunkState State
+    {
+        get { return chunkState; }
+    }
 
     // Mesh display
     new MeshRenderer renderer;
@@ -60,11 +78,13 @@ public class Chunk : MonoBehaviour
     }
 
     #region Coordinate Conversion
+    [MethodImpl(INLINE)]
     public BlockPos Chunk2World(BlockPos pos)
     {
         return pos + (BlockPos)(chunkPos * CHUNK_SIZE);
     }
 
+    [MethodImpl(INLINE)]
     public BlockPos World2Chunk(BlockPos pos)
     {
         return pos - (BlockPos)pos.GetChunkPos() * CHUNK_SIZE;
@@ -73,6 +93,7 @@ public class Chunk : MonoBehaviour
 
     #region Block Handling
     // Make sure a position exists in the chunk
+    [MethodImpl(INLINE)]
     bool ValidatePos(BlockPos pos)
     {
         return pos.x >= 0 && pos.y >= 0 && pos.z >= 0 &&
@@ -80,6 +101,7 @@ public class Chunk : MonoBehaviour
     }
 
     // Get a block at a position
+    [MethodImpl(INLINE)]
     public Block GetBlock(BlockPos pos)
     {
         if (ValidatePos(pos))
@@ -92,17 +114,20 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    [MethodImpl(INLINE)]
     public Block GetBlockUnchecked(BlockPos pos)
     {
         return Blocks.FromId(blocks[pos.x + pos.y * CHUNK_SIZE + pos.z * CHUNK_SIZE * CHUNK_SIZE]);
     }
 
+    [MethodImpl(INLINE)]
     public Block GetBlock(Vector3 pos)
     {
         return GetBlock(new BlockPos(pos));
     }
 
     // Set a block at a position
+    [MethodImpl(INLINE)]
     public void SetBlock(BlockPos pos, Block block)
     {
         if (ValidatePos(pos))
